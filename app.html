@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gestão da Loja — Protegido por Login</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+    body { background: #f4f6f9; color: #111827; min-height: 100vh; display:flex; flex-direction:column; }
+    header { background: #1e293b; color: #fff; padding: 12px 16px; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    .brand { font-weight:800; font-size:1.05rem; }
+    .container { width:100%; max-width:980px; margin:28px auto; padding: 0 16px; flex:1; }
+    .card { background:#fff; border-radius:12px; padding:18px; margin-bottom:16px; box-shadow:0 1px 6px rgba(2,6,23,0.06); border:1px solid #e6eef7; }
+    .grid { display:grid; grid-template-columns: 1fr 360px; gap:20px; align-items:start; }
+    h1 { margin-bottom:8px; font-size:1.3rem; }
+    p.lead { color:#475569; margin-bottom:12px; }
+    .btn { padding:10px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
+    .btn-primary { background:#2563eb; color:#fff; }
+    .btn-ghost { background:transparent; border:1px solid #cbd5e1; color:#0f172a; }
+    .btn-small { padding:8px 10px; border-radius:8px; }
+    .nav-bar { position: fixed; bottom: 0; left:0; right:0; height:64px; background:#fff; display:flex; gap:0; border-top:1px solid #e6eef7; box-shadow:0 -2px 8px rgba(0,0,0,0.04); z-index:120; }
+    .nav-btn { flex:1; text-align:center; font-size:0.9rem; color:#64748b; background:none; border:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; cursor:pointer; }
+    .nav-btn.active { color:#2563eb; font-weight:700; }
+    .hidden { display:none !important; }
+    input, select, textarea { width:100%; padding:10px; margin-top:8px; border-radius:8px; border:1px solid #cbd5e1; background:#fbfdff; }
+    label { display:block; margin-top:12px; font-weight:600; color:#475569; font-size:0.9rem; }
+    .muted { color:#94a3b8; font-size:0.95rem; }
+    .list-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9; }
+    .badge { background:#eef2ff; color:#3730a3; padding:6px 8px; border-radius:8px; font-weight:700; font-size:0.8rem; }
+    .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,6,23,0.45); z-index:300; }
+    .modal.hidden { display:none; }
+    .modal-card { width:92%; max-width:560px; background:#fff; padding:18px; border-radius:12px; box-shadow:0 12px 40px rgba(2,6,23,0.35); }
+    .right { margin-left:auto; }
+    .small { padding:6px 8px; border-radius:8px; cursor:pointer; border:1px solid #cbd5e1; background:transparent; }
+    .danger { background:#ef4444; color:#fff; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
+    .empty { color:#94a3b8; padding:12px 0; }
+    .item-box { border-left:4px solid #2563eb; background:#fbfeff; padding:10px; border-radius:8px; margin-bottom:10px; }
+    .locked { display:flex; flex-direction:column; align-items:center; gap:10px; padding:20px; border-radius:8px; background:#fff5f5; border:1px solid #fee2e2; color:#7f1d1d; }
+    footer.info { padding:10px 16px; color:#475569; font-size:0.9rem; text-align:center; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">Gestão da Loja</div>
+    <div id="header-controls">
+      <span id="hdr-welcome" style="color:#dbeafe; font-weight:700;"></span>
+      <button id="hdr-auth-btn" class="small" onclick="hdrAuthAction()">Entrar</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- VIEW: Landing / Entrada -->
+    <section id="view-landing" class="card">
+      <div class="grid">
+        <div>
+          <h1>Bem-vindo ao sistema de Gestão da Loja</h1>
+          <p class="lead">Gerencie avisos, checklists e colaboradores. Faça login para ver e operar todas as abas.</p>
+
+          <div style="margin-top:18px; display:flex; gap:10px; align-items:center;">
+            <button class="btn btn-primary" onclick="goTo('#login')">Entrar / Criar Conta</button>
+            <button class="btn btn-ghost" onclick="goTo('#avisos')">Ir para Avisos</button>
+            <button class="btn btn-ghost" onclick="goTo('#checklist')">Ir para Checklist</button>
+          </div>
+
+          <div style="margin-top:18px;">
+            <h3>Como começar</h3>
+            <ol style="color:#475569; margin-top:8px;">
+              <li>Se for o primeiro uso, crie a conta Administrador (será solicitada ao entrar).</li>
+              <li>Depois de logado, acesse "Usuários" para criar colaboradores ou permitir acesso.</li>
+              <li>Use "Avisos" e "Checklist" para rotinas diárias.</li>
+            </ol>
+          </div>
+        </div>
+
+        <aside>
+          <div style="background:#fbfdff; border-radius:8px; padding:12px;">
+            <h3 style="margin-top:0;">Acesso rápido</h3>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+              <button class="btn btn-primary" onclick="goTo('#avisos')">Avisos</button>
+              <button class="btn btn-primary" onclick="goTo('#checklist')">Checklist</button>
+              <button class="btn btn-primary" onclick="goTo('#usuarios')">Usuários</button>
+            </div>
+            <div style="margin-top:12px;">
+              <small class="muted">Se não houver usuários, ao entrar será pedido para criar o primeiro Administrador.</small>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- VIEW: Avisos -->
+    <section id="view-avisos" class="card hidden">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <h2>📢 Avisos</h2>
+        <div><button class="small" onclick="goTo('#landing')">Voltar</button></div>
+      </div>
+
+      <!-- LOCKED -->
+      <div id="avisos-locked" class="locked hidden">
+        <div style="font-weight:700">Acesso restrito</div>
+        <div>Faça login para visualizar e publicar avisos.</div>
+        <div><button class="btn btn-primary" onclick="showAuthModal('login')">Entrar</button></div>
+      </div>
+
+      <!-- CONTENT -->
+      <div id="avisos-content" class="hidden">
+        <label>Título do Aviso</label>
+        <input id="aviso-title" placeholder="Ex: Reunião Geral de Alinhamento">
+        <label>Mensagem</label>
+        <textarea id="aviso-msg" rows="4" placeholder="Digite o comunicado para a equipe..."></textarea>
+        <div style="margin-top:12px; display:flex; gap:8px;">
+          <button class="btn btn-primary" onclick="publishAviso()">Publicar</button>
+          <button class="btn btn-ghost" onclick="shareLastByWhatsApp()">Enviar último via WhatsApp</button>
+        </div>
+
+        <div style="margin-top:18px;">
+          <h3>Mural de Recados</h3>
+          <div id="lista-avisos"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: Checklist -->
+    <section id="view-checklist" class="card hidden">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <h2>📋 Checklist Diário</h2>
+        <div><button class="small" onclick="goTo('#landing')">Voltar</button></div>
+      </div>
+
+      <div id="check-locked" class="locked hidden">
+        <div style="font-weight:700">Acesso restrito</div>
+        <div>Faça login para visualizar e registrar checklists.</div>
+        <div><button class="btn btn-primary" onclick="showAuthModal('login')">Entrar</button></div>
+      </div>
+
+      <div id="check-content" class="hidden">
+        <label>Selecione a Loja / Unidade</label>
+        <select id="select-loja">
+          <option>Centro</option>
+          <option>Shopping</option>
+          <option>Jóquei</option>
+        </select>
+
+        <div style="margin-top:12px;">
+          <div class="list-row"><div>Conferir fundo de caixa</div><input type="checkbox" class="chk-task"></div>
+          <div class="list-row"><div>Limpeza e organização do balcão</div><input type="checkbox" class="chk-task"></div>
+          <div class="list-row"><div>Conferir etiquetas e precificação</div><input type="checkbox" class="chk-task"></div>
+          <div class="list-row"><div>Verificação de iluminação e ilhas</div><input type="checkbox" class="chk-task"></div>
+          <div class="list-row"><div>Desligar equipamentos/luzes no fechamento</div><input type="checkbox" class="chk-task"></div>
+        </div>
+
+        <label>Observações / Ocorrências</label>
+        <input id="chk-obs" placeholder="Algum problema ou observação?">
+        <div style="margin-top:12px;">
+          <button class="btn btn-primary" onclick="saveChecklist()">Registrar Conclusão</button>
+        </div>
+
+        <div style="margin-top:18px;">
+          <h3>Histórico</h3>
+          <div id="lista-checklists"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: Usuários -->
+    <section id="view-usuarios" class="card hidden">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <h2>👥 Controle de Usuários</h2>
+        <div>
+          <button class="btn btn-primary" id="btn-new-user" onclick="openUserModal(null)">Novo Usuário</button>
+          <button class="small" onclick="goTo('#landing')">Voltar</button>
+        </div>
+      </div>
+
+      <div id="users-locked" class="locked hidden">
+        <div style="font-weight:700">Acesso restrito</div>
+        <div>Faça login para gerenciar usuários.</div>
+        <div><button class="btn btn-primary" onclick="showAuthModal('login')">Entrar</button></div>
+      </div>
+
+      <div id="users-content" class="hidden">
+        <div id="lista-usuarios" style="margin-top:12px;"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="nav-bar">
+    <button class="nav-btn active" id="nav-avisos" onclick="goTo('#avisos', this)">📢<div>Avisos</div></button>
+    <button class="nav-btn" id="nav-check" onclick="goTo('#checklist', this)">📋<div>Checklist</div></button>
+    <button class="nav-btn" id="nav-users" onclick="goTo('#usuarios', this)">👥<div>Usuários</div></button>
+  </nav>
+
+  <footer class="info">Dados salvos no navegador (localStorage). Faça backup exportando usuários quando necessário.</footer>
+
+  <!-- Modals -->
+  <div id="modal-auth" class="modal hidden" onclick="if(event.target===this) closeAuthModal()">
+    <div class="modal-card">
+      <div id="auth-area"></div>
+    </div>
+  </div>
+
+  <div id="modal-user" class="modal hidden" onclick="if(event.target===this) closeUserModal()">
+    <div class="modal-card">
+      <div id="user-form-area"></div>
+    </div>
+  </div>
+
+  <script>
+    /* -------------------------
+       Storage keys and helpers
+       ------------------------- */
+    const LS_USERS = 'app_users_v2';
+    const LS_AVISOS = 'app_avisos';
+    const LS_CHECKS = 'app_checklists';
+    const SESSION_KEY = 'app_session_v2';
+
+    function getUsers(){ return JSON.parse(localStorage.getItem(LS_USERS) || '[]'); }
+    function saveUsers(u){ localStorage.setItem(LS_USERS, JSON.stringify(u)); }
+    function getSession(){ return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); }
+    function setSession(s){ if(s) sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)); else sessionStorage.removeItem(SESSION_KEY); refreshHeader(); }
+
+    function generateId(){ return 'u_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+
+    async function genSalt(){ const a=new Uint8Array(12); crypto.getRandomValues(a); return Array.from(a).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+    async function hashWithSalt(password, salt){ const enc=new TextEncoder(); const data=enc.encode(salt + password); const h=await crypto.subtle.digest('SHA-256', data); return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+
+    /* -------------------------
+       Routing and view control
+       ------------------------- */
+    let pendingHash = null; // stores requested protected view when not logged in
+
+    function hideAllViews(){
+      document.getElementById('view-landing').classList.add('hidden');
+      document.getElementById('view-avisos').classList.add('hidden');
+      document.getElementById('view-checklist').classList.add('hidden');
+      document.getElementById('view-usuarios').classList.add('hidden');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function goTo(hash, btn){
+      if(!hash) return;
+      location.hash = hash;
+      if(btn) { document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+    }
+
+    async function route(){
+      const raw = (location.hash || '#landing').replace('#','');
+      hideAllViews();
+      if (raw === 'landing') {
+        document.getElementById('view-landing').classList.remove('hidden');
+      } else if (raw === 'login') {
+        showAuthModal('login');
+        document.getElementById('view-landing').classList.remove('hidden');
+      } else if (raw === 'avisos') {
+        document.getElementById('view-avisos').classList.remove('hidden');
+        document.getElementById('nav-avisos').classList.add('active');
+        await protectView('avisos');
+      } else if (raw === 'checklist' || raw === 'check') {
+        document.getElementById('view-checklist').classList.remove('hidden');
+        document.getElementById('nav-check').classList.add('active');
+        await protectView('checklist');
+      } else if (raw === 'usuarios') {
+        document.getElementById('view-usuarios').classList.remove('hidden');
+        document.getElementById('nav-users').classList.add('active');
+        await protectView('usuarios');
+      } else {
+        document.getElementById('view-landing').classList.remove('hidden');
+      }
+      refreshHeader();
+    }
+
+    window.addEventListener('hashchange', route);
+
+    /* -------------------------
+       Initial check: first run
+       ------------------------- */
+    (function init(){
+      try {
+        const users = getUsers();
+        if (!users || users.length === 0) {
+          // Force the register modal on first load
+          setTimeout(()=> showAuthModal('register-first'), 120);
+        }
+        setTimeout(route, 150);
+      } catch (err) {
+        alert('Erro de inicialização: ' + err.message);
+        console.error(err);
+      }
+    })();
+
+    /* -------------------------
+       Header controls
+       ------------------------- */
+    function refreshHeader(){
+      const sess = getSession();
+      const btn = document.getElementById('hdr-auth-btn');
+      const welcome = document.getElementById('hdr-welcome');
+      if (sess) {
+        welcome.innerText = `${sess.name} (${sess.role})`;
+        btn.innerText = 'Sair';
+        document.getElementById('btn-new-user')?.style?.setProperty('display', sess.role === 'Administrador' ? 'inline-block' : 'none');
+      } else {
+        welcome.innerText = '';
+        btn.innerText = 'Entrar';
+        document.getElementById('btn-new-user')?.style?.setProperty('display', 'none');
+      }
+    }
+
+    function hdrAuthAction(){
+      const sess = getSession();
+      if (sess) {
+        if (confirm('Deseja sair?')) { setSession(null); alert('Desconectado.'); goTo('#landing'); }
+      } else {
+        showAuthModal('login');
+      }
+    }
+
+    /* -------------------------
+       Auth modal (login / register)
+       ------------------------- */
+    function showAuthModal(mode){
+      const modal = document.getElementById('modal-auth');
+      const area = document.getElementById('auth-area');
+      area.innerHTML = '';
+      if (mode === 'register-first') {
+        area.innerHTML = `
+          <h3>Criar Conta Administrador (Primeiro uso)</h3>
+          <label>Nome completo</label><input id="r_name" placeholder="Seu nome">
+          <label>Usuário (login)</label><input id="r_username" placeholder="Ex: admin">
+          <label>Senha</label><input id="r_password" type="password" placeholder="Mínimo 6 caracteres">
+          <label>Confirmar senha</label><input id="r_password2" type="password" placeholder="Repita a senha">
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="createInitialAdmin()">Criar admin</button>
+            <button class="btn btn-ghost" onclick="closeAuthModal()">Cancelar</button>
+          </div>
+        `;
+      } else if (mode === 'login') {
+        area.innerHTML = `
+          <h3>Login</h3>
+          <label>Usuário</label><input id="l_username" placeholder="Seu usuário">
+          <label>Senha</label><input id="l_password" type="password" placeholder="Sua senha">
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="attemptLogin()">Entrar</button>
+            <button class="btn btn-ghost" onclick="closeAuthModal()">Fechar</button>
+          </div>
+          <div id="auth-msg" class="muted" style="margin-top:8px"></div>
+        `;
+      } else if (mode === 'register') {
+        area.innerHTML = `
+          <h3>Criar Conta (Admin requerido)</h3>
+          <label>Nome completo</label><input id="r_name2" placeholder="Nome">
+          <label>Usuário</label><input id="r_username2" placeholder="login">
+          <label>Senha</label><input id="r_password_new" type="password" placeholder="Senha mínima 6">
+          <label>Confirmar senha</label><input id="r_password2_new" type="password" placeholder="Repita">
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="attemptCreateByAdmin()">Criar (requer admin)</button>
+            <button class="btn btn-ghost" onclick="closeAuthModal()">Fechar</button>
+          </div>
+          <div id="auth-msg2" class="muted" style="margin-top:8px"></div>
+        `;
+      }
+      modal.classList.remove('hidden');
+      setTimeout(()=> { const first = area.querySelector('input'); if(first) first.focus(); }, 60);
+    }
+    function closeAuthModal(){ document.getElementById('modal-auth').classList.add('hidden'); }
+
+    async function createInitialAdmin(){
+      try {
+        const name = document.getElementById('r_name').value.trim();
+        const username = document.getElementById('r_username').value.trim();
+        const pw = document.getElementById('r_password').value;
+        const pw2 = document.getElementById('r_password2').value;
+        if (!name || !username || !pw) { alert('Preencha todos os campos.'); return; }
+        if (pw.length < 6) { alert('Senha mínima 6.'); return; }
+        if (pw !== pw2) { alert('Senhas não conferem.'); return; }
+        const users = getUsers();
+        if (users.find(u=>u.username===username)) { alert('Usuário já existe.'); return; }
+        const salt = await genSalt();
+        const hash = await hashWithSalt(pw, salt);
+        const u = { id: generateId(), username, name, role: 'Administrador', salt, hash, createdAt: new Date().toISOString() };
+        users.push(u);
+        saveUsers(users);
+        setSession({ id: u.id, username: u.username, name: u.name, role: u.role });
+        closeAuthModal();
+        alert('Admin criado e logado.');
+        refreshHeader();
+        if (pendingHash) { goTo(pendingHash); pendingHash = null; }
+        else goTo('#avisos', document.getElementById('nav-avisos'));
+      } catch (err) { alert('Erro: ' + err.message); }
+    }
+
+    async function attemptLogin(){
+      try {
+        const username = document.getElementById('l_username').value.trim();
+        const pw = document.getElementById('l_password').value;
+        if (!username || !pw) { document.getElementById('auth-msg').innerText = 'Preencha usuário e senha.'; return; }
+        const users = getUsers();
+        const u = users.find(x => x.username === username);
+        if (!u) { document.getElementById('auth-msg').innerText = 'Usuário não encontrado.'; return; }
+        const hash = await hashWithSalt(pw, u.salt);
+        if (hash === u.hash) {
+          setSession({ id: u.id, username: u.username, name: u.name, role: u.role });
+          closeAuthModal();
+          alert('Login realizado: ' + u.name);
+          if (pendingHash) { const ph = pendingHash; pendingHash = null; goTo(ph); }
+          else goTo('#avisos', document.getElementById('nav-avisos'));
+        } else {
+          document.getElementById('auth-msg').innerText = 'Usuário ou senha inválidos.';
+        }
+      } catch (err) { alert('Erro no login: ' + err.message); }
+    }
+
+    async function attemptCreateByAdmin(){
+      const sess = getSession();
+      if (!sess || sess.role !== 'Administrador') { alert('Ação permitida apenas para Administrador logado.'); return; }
+      const name = document.getElementById('r_name2').value.trim();
+      const username = document.getElementById('r_username2').value.trim();
+      const pw = document.getElementById('r_password_new').value;
+      const pw2 = document.getElementById('r_password2_new').value;
+      if (!name || !username || !pw) { document.getElementById('auth-msg2').innerText = 'Preencha todos os campos.'; return; }
+      if (pw.length < 6) { document.getElementById('auth-msg2').innerText = 'Senha mínima 6.'; return; }
+      if (pw !== pw2) { document.getElementById('auth-msg2').innerText = 'Senhas não conferem.'; return; }
+      const users = getUsers();
+      if (users.find(u=>u.username===username)) { document.getElementById('auth-msg2').innerText = 'Usuário já existe.'; return; }
+      const salt = await genSalt(); const hash = await hashWithSalt(pw, salt);
+      const u = { id: generateId(), username, name, role: 'Funcionário', salt, hash, createdAt: new Date().toISOString() };
+      users.push(u); saveUsers(users);
+      closeAuthModal(); alert('Usuário criado.'); renderUsers();
+    }
+
+    /* -------------------------
+       protectView: toggles locked/content based on session
+       ------------------------- */
+    async function protectView(name) {
+      const sess = getSession();
+      if (!sess) {
+        pendingHash = '#' + name;
+        if (name === 'avisos') {
+          document.getElementById('avisos-locked').classList.remove('hidden');
+          document.getElementById('avisos-content').classList.add('hidden');
+        }
+        if (name === 'checklist') {
+          document.getElementById('check-locked').classList.remove('hidden');
+          document.getElementById('check-content').classList.add('hidden');
+        }
+        if (name === 'usuarios') {
+          document.getElementById('users-locked').classList.remove('hidden');
+          document.getElementById('users-content').classList.add('hidden');
+        }
+        showAuthModal('login');
+        return;
+      }
+
+      if (name === 'avisos') {
+        document.getElementById('avisos-locked').classList.add('hidden');
+        document.getElementById('avisos-content').classList.remove('hidden');
+        loadAvisos();
+      }
+      if (name === 'checklist') {
+        document.getElementById('check-locked').classList.add('hidden');
+        document.getElementById('check-content').classList.remove('hidden');
+        loadCheckHistory();
+      }
+      if (name === 'usuarios') {
+        document.getElementById('users-locked').classList.add('hidden');
+        document.getElementById('users-content').classList.remove('hidden');
+        renderUsers();
+      }
+    }
+
+    /* -------------------------
+       User CRUD modal & functions
+       ------------------------- */
+    function openUserModal(userId){
+      const modal = document.getElementById('modal-user');
+      const area = document.getElementById('user-form-area');
+      const users = getUsers();
+      const sess = getSession();
+      if (!userId && (!sess || sess.role !== 'Administrador')) { alert('Somente administrador pode criar usuários.'); showAuthModal('login'); return; }
+      const user = users.find(u=>u.id===userId) || null;
+      const isNew = !user;
+      area.innerHTML = `
+        <h3>${isNew ? 'Criar Usuário' : 'Editar Usuário'}</h3>
+        <label>Nome completo</label><input id="u_name" value="${user ? escapeHtml(user.name) : ''}">
+        <label>Usuário (login)</label><input id="u_username" value="${user ? escapeHtml(user.username) : ''}">
+        <label>Papel</label>
+        <select id="u_role">
+          <option${user && user.role==='Funcionário' ? ' selected' : ''}>Funcionário</option>
+          <option${user && user.role==='Gerente' ? ' selected' : ''}>Gerente</option>
+          <option${user && user.role==='Administrador' ? ' selected' : ''}>Administrador</option>
+        </select>
+        <label>Senha ${isNew ? '(obrigatória)' : '(deixe em branco para manter)'}</label>
+        <input id="u_password" type="password" placeholder="${isNew ? 'Senha (mín 6)' : 'Nova senha (opcional)'}">
+        <label>Confirmar senha</label><input id="u_password2" type="password" placeholder="Repita a senha">
+        <div style="margin-top:12px; display:flex; gap:8px;">
+          <button class="btn btn-primary" onclick="saveUser('${user ? user.id : ''}')">${isNew ? 'Criar' : 'Salvar'}</button>
+          <button class="btn btn-ghost" onclick="closeUserModal()">Cancelar</button>
+          ${!isNew ? `<button class="danger right" onclick="deleteUser('${user.id}')">Excluir</button>` : ''}
+        </div>
+        <div id="user-form-msg" class="muted" style="margin-top:8px"></div>
+      `;
+      if (!sess) { closeUserModal(); showAuthModal('login'); return; }
+      if (user && sess.role !== 'Administrador' && sess.id !== user.id) { alert('Somente admin pode editar outros usuários.'); closeUserModal(); return; }
+      if (sess.role !== 'Administrador') document.getElementById('u_role').disabled = true;
+      modal.classList.remove('hidden');
+      setTimeout(()=> { const f=document.getElementById('u_name'); if(f) f.focus(); },60);
+    }
+
+    function closeUserModal(){ document.getElementById('modal-user').classList.add('hidden'); }
+
+    async function saveUser(userId){
+      const name = document.getElementById('u_name').value.trim();
+      const username = document.getElementById('u_username').value.trim();
+      const role = document.getElementById('u_role').value;
+      const pw = document.getElementById('u_password').value;
+      const pw2 = document.getElementById('u_password2').value;
+      const msgEl = document.getElementById('user-form-msg');
+      msgEl.innerText = '';
+      if (!name || !username) { msgEl.innerText = 'Nome e usuário são obrigatórios.'; return; }
+      const users = getUsers();
+      const sess = getSession();
+      if (!sess) { alert('Faça login.'); closeUserModal(); showAuthModal('login'); return; }
+      const conflict = users.find(u=>u.username===username && u.id !== userId);
+      if (conflict) { msgEl.innerText = 'Login em uso.'; return; }
+
+      if (!userId) {
+        if (!pw || pw.length < 6) { msgEl.innerText = 'Senha obrigatória com mínimo 6.'; return; }
+        const salt = await genSalt(); const hash = await hashWithSalt(pw, salt);
+        const newU = { id: generateId(), username, name, role, salt, hash, createdAt: new Date().toISOString() };
+        users.push(newU); saveUsers(users); closeUserModal(); alert('Usuário criado.'); renderUsers(); return;
+      }
+
+      const idx = users.findIndex(u=>u.id===userId);
+      if (idx === -1) { msgEl.innerText = 'Usuário não encontrado.'; return; }
+      if (sess.role !== 'Administrador' && sess.id !== userId) { msgEl.innerText = 'Sem permissão.'; return; }
+      const old = users[idx];
+      if (old.role === 'Administrador' && role !== 'Administrador') {
+        const admins = users.filter(u=>u.role==='Administrador');
+        if (admins.length <= 1) { msgEl.innerText = 'Não é possível remover o único Administrador.'; return; }
+      }
+      users[idx].name = name;
+      users[idx].username = username;
+      if (sess.role === 'Administrador') users[idx].role = role;
+      if (pw) {
+        if (pw.length < 6) { msgEl.innerText = 'Senha mínima 6.'; return; }
+        if (pw !== pw2) { msgEl.innerText = 'Senhas não conferem.'; return; }
+        const salt = await genSalt(); const hash = await hashWithSalt(pw, salt);
+        users[idx].salt = salt; users[idx].hash = hash;
+      }
+      saveUsers(users);
+      const sessNow = getSession();
+      if (sessNow && sessNow.id === userId) setSession({ id: users[idx].id, username: users[idx].username, name: users[idx].name, role: users[idx].role });
+      closeUserModal(); alert('Usuário salvo.'); renderUsers();
+    }
+
+    function deleteUser(userId){
+      if (!confirm('Confirma exclusão?')) return;
+      const users = getUsers(); const idx = users.findIndex(u=>u.id===userId);
+      if (idx === -1) { alert('Usuário não encontrado.'); return; }
+      const target = users[idx];
+      if (target.role==='Administrador') {
+        const admins = users.filter(u=>u.role==='Administrador');
+        if (admins.length <= 1) { alert('Não é possível excluir o último Administrador.'); return; }
+      }
+      users.splice(idx,1); saveUsers(users);
+      const sess = getSession(); if (sess && sess.id === userId) setSession(null);
+      closeUserModal(); alert('Usuário excluído.'); renderUsers();
+    }
+
+    function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function renderUsers(){
+      const list = document.getElementById('lista-usuarios');
+      const users = getUsers();
+      const sess = getSession();
+      if (!users || users.length === 0) { list.innerHTML = '<div class="empty">Nenhum usuário cadastrado.</div>'; return; }
+      list.innerHTML = users.map(u => {
+        const actions = [];
+        if (sess && (sess.role === 'Administrador' || sess.id === u.id)) actions.push(`<button class="small" onclick="openUserModal('${u.id}')">Editar</button>`);
+        if (sess && sess.role === 'Administrador') actions.push(`<button class="danger" onclick="deleteUser('${u.id}')">Excluir</button>`);
+        return `
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9;">
+            <div>
+              <div style="font-weight:700">${escapeHtml(u.name)} <span style="color:#64748b; font-weight:600; font-size:0.85rem">(${escapeHtml(u.username)})</span></div>
+              <div style="margin-top:6px;"><span class="badge">${u.role}</span> <span class="muted" style="margin-left:10px">Criado: ${new Date(u.createdAt).toLocaleString()}</span></div>
+            </div>
+            <div style="display:flex; gap:6px;">${actions.join(' ')}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* -------------------------
+       Avisos & Checklists
+       ------------------------- */
+    function loadAvisos(){
+      const a = JSON.parse(localStorage.getItem(LS_AVISOS) || '[]');
+      const container = document.getElementById('lista-avisos');
+      if (!a || a.length === 0) { container.innerHTML = '<div class="empty">Nenhum aviso publicado ainda.</div>'; return; }
+      container.innerHTML = a.map(av => `
+        <div class="item-box">
+          <div style="font-weight:700">${escapeHtml(av.titulo)}</div>
+          <div style="color:#475569; margin-top:6px;">${escapeHtml(av.msg)}</div>
+          <div style="color:#94a3b8; margin-top:6px; font-size:0.85rem;">${av.data} ${av.by ? ' — ' + escapeHtml(av.by) : ''}</div>
+        </div>
+      `).join('');
+    }
+
+    function publishAviso(){
+      const t = document.getElementById('aviso-title').value.trim();
+      const m = document.getElementById('aviso-msg').value.trim();
+      if (!t || !m) { alert('Preencha título e mensagem.'); return; }
+      const avisos = JSON.parse(localStorage.getItem(LS_AVISOS) || '[]');
+      const sess = getSession();
+      avisos.unshift({ titulo: t, msg: m, data: new Date().toLocaleString('pt-BR'), by: sess ? sess.name : null });
+      localStorage.setItem(LS_AVISOS, JSON.stringify(avisos));
+      document.getElementById('aviso-title').value = ''; document.getElementById('aviso-msg').value = '';
+      loadAvisos();
+    }
+    function shareLastByWhatsApp(){
+      const avisos = JSON.parse(localStorage.getItem(LS_AVISOS) || '[]');
+      if (!avisos.length) { alert('Nenhum aviso para enviar.'); return; }
+      const last = avisos[0];
+      const text = '*' + last.titulo + '*\n' + last.msg;
+      window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+    }
+
+    function saveChecklist(){
+      const loja = document.getElementById('select-loja').value;
+      const obs = document.getElementById('chk-obs').value.trim();
+      const tarefas = document.querySelectorAll('.chk-task');
+      let concl = 0;
+      tarefas.forEach(t => { if (t.checked) concl++; t.checked = false; });
+      const registro = { loja, total: tarefas.length, concluidas: concl, obs: obs || 'Sem observações', data: new Date().toLocaleString('pt-BR') };
+      const hist = JSON.parse(localStorage.getItem(LS_CHECKS) || '[]');
+      hist.unshift(registro); localStorage.setItem(LS_CHECKS, JSON.stringify(hist));
+      document.getElementById('chk-obs').value = '';
+      alert('Checklist registrado.');
+      loadCheckHistory();
+    }
+    function loadCheckHistory(){
+      const hist = JSON.parse(localStorage.getItem(LS_CHECKS) || '[]');
+      const el = document.getElementById('lista-checklists');
+      if (!el) return;
+      if (!hist || hist.length === 0) { el.innerHTML = '<div class="empty">Nenhum checklist registrado.</div>'; return; }
+      el.innerHTML = hist.map(h => `
+        <div class="item-box" style="border-left:4px solid #10b981; margin-bottom:8px;">
+          <div style="font-weight:700">Unidade: ${escapeHtml(h.loja)}</div>
+          <div style="color:#059669; margin-top:6px;">${h.concluidas}/${h.total} concluídos</div>
+          <div style="color:#475569; margin-top:6px;">Obs: ${escapeHtml(h.obs)}</div>
+          <div style="color:#94a3b8; margin-top:6px; font-size:0.85rem;">${h.data}</div>
+        </div>
+      `).join('');
+    }
+
+    /* -------------------------
+       Utilities & startup
+       ------------------------- */
+    document.addEventListener('DOMContentLoaded', ()=> {
+      refreshHeader();
+      loadAvisos();
+      loadCheckHistory();
+      renderUsers();
+      route();
+    });
+
+    // expose for debugging (console)
+    window.openUserModal = openUserModal;
+    window.showAuthModal = showAuthModal;
+
+  </script>
+</body>
+</html>
